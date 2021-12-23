@@ -1,6 +1,6 @@
 import type { MetaFunction, LoaderFunction } from "remix";
 import { useLoaderData, json } from "remix";
-import { ChangeEvent, useState, useMemo } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 
 import { ANSWERS, QUESTIONS } from "../constants";
@@ -8,6 +8,7 @@ import { shuffleArray } from "../utils";
 
 // note: this is not secure whatsoever, it's here just to add hoops to discourage someone trying to pry
 const PASSWORD = "kirby";
+const LOCAL_STORAGE_KEY = "nickey-playlist-game-answers";
 
 type IndexData = {
   answers: Array<{
@@ -53,8 +54,25 @@ export default function Index() {
   const [password, setPassword] = useState("");
   const selectedAnswerIds = Object.values(selectedAnswers);
 
-  //JTM issues:
-  // - need to save to local storage
+  useEffect(() => {
+    const storedAnswers = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!storedAnswers) {
+      return;
+    }
+
+    const storedAnswersJson = JSON.parse(storedAnswers);
+    setSelectedAnswers(storedAnswersJson);
+    setPassword(PASSWORD);
+  }, []);
+
+  useEffect(() => {
+    if (password !== PASSWORD) {
+      return;
+    }
+
+    const newLocalStorageAnswers = JSON.stringify(selectedAnswers);
+    window.localStorage.setItem(LOCAL_STORAGE_KEY, newLocalStorageAnswers);
+  }, [selectedAnswers]);
 
   return (
     <div className="remix__page">
