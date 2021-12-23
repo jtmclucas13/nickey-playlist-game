@@ -6,6 +6,9 @@ import { FaCheck, FaTimes } from "react-icons/fa";
 import { ANSWERS, QUESTIONS } from "../constants";
 import { shuffleArray } from "../utils";
 
+// note: this is not secure whatsoever, it's here just to add hoops to discourage someone trying to pry
+const PASSWORD = "kirby";
+
 type IndexData = {
   answers: Array<{
     id: string;
@@ -47,6 +50,7 @@ export default function Index() {
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<string, string>
   >({});
+  const [password, setPassword] = useState("");
   const selectedAnswerIds = Object.values(selectedAnswers);
 
   //JTM issues:
@@ -92,35 +96,58 @@ export default function Index() {
           browser's data, you will lose your progress.
         </p>
         <hr />
-        {data.questions.map((question) => {
-          const remainingAnswers = answers.filter(
-            (answer) =>
-              !selectedAnswerIds.includes(answer.id) ||
-              answer.id === selectedAnswers[question.id]
-          );
-          const options = remainingAnswers.map((answer) => ({
-            label: answer.text,
-            value: answer.id,
-          }));
+        {password === PASSWORD ? (
+          data.questions.map((question) => {
+            const remainingAnswers = answers.filter(
+              (answer) =>
+                !selectedAnswerIds.includes(answer.id) ||
+                answer.id === selectedAnswers[question.id]
+            );
+            const options = remainingAnswers.map((answer) => ({
+              label: answer.text,
+              value: answer.id,
+            }));
 
-          return (
-            <Question
-              key={question.answerId}
-              correctAnswer={
-                answers.find((answer) => answer.id === question.answerId)!
-              }
-              onChange={(e) =>
-                setSelectedAnswers({
-                  ...selectedAnswers,
-                  [question.id]: e.target.value,
-                })
-              }
-              options={options}
-              question={question.text}
-              value={selectedAnswers[question.id]}
-            />
-          );
-        })}
+            return (
+              <Question
+                key={question.answerId}
+                correctAnswer={
+                  answers.find((answer) => answer.id === question.answerId)!
+                }
+                onChange={(e) =>
+                  setSelectedAnswers({
+                    ...selectedAnswers,
+                    [question.id]: e.target.value,
+                  })
+                }
+                options={options}
+                question={question.text}
+                value={selectedAnswers[question.id]}
+              />
+            );
+          })
+        ) : (
+          <div>
+            Enter password to play:
+            <div style={{ marginTop: 16 }}>
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  maxWidth: 200,
+                }}
+              >
+                Password
+                <input
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ marginTop: 4 }}
+                  type="password"
+                  value={password}
+                />
+              </label>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
