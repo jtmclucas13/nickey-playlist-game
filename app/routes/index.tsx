@@ -1,6 +1,7 @@
 import type { MetaFunction, LoaderFunction } from "remix";
 import { useLoaderData, json } from "remix";
 import { ChangeEvent, useState, useMemo } from "react";
+import { FaCheck, FaTimes } from "react-icons/fa";
 
 import { ANSWERS, QUESTIONS } from "../constants";
 import { shuffleArray } from "../utils";
@@ -46,21 +47,10 @@ export default function Index() {
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<string, string>
   >({});
+  const selectedAnswerIds = Object.values(selectedAnswers);
 
   //JTM issues:
-  // - when you have the correct answer, it disappears from the select
-  // - need a success state
   // - need to save to local storage
-  const options = useMemo(() => {
-    const selectedAnswerIds = Object.values(selectedAnswers);
-    const remainingAnswers = answers.filter(
-      (answer) => !selectedAnswerIds.includes(answer.id)
-    );
-    return remainingAnswers.map((answer) => ({
-      label: answer.text,
-      value: answer.id,
-    }));
-  }, [answers, selectedAnswers]);
 
   return (
     <div className="remix__page">
@@ -74,7 +64,7 @@ export default function Index() {
           Match the song to the reason I put it on the playlist. The reasons
           range from very deep to just thinking you might like the song.
         </p>
-        <p>
+        <p style={{ marginBottom: 24 }}>
           I tried to limit the playlist to one song per artist. I also tried to
           avoid artists/songs you sent me, except when they're extremely
           relevant. And for the first time this was published I looked through
@@ -102,21 +92,35 @@ export default function Index() {
           browser's data, you will lose your progress.
         </p>
         <hr />
-        {data.questions.map((question) => (
-          <Question
-            key={question.answerId}
-            answer={question.answerId}
-            onChange={(e) =>
-              setSelectedAnswers({
-                ...selectedAnswers,
-                [question.id]: e.target.value,
-              })
-            }
-            options={options}
-            question={question.text}
-            value={selectedAnswers[question.id]}
-          />
-        ))}
+        {data.questions.map((question) => {
+          const remainingAnswers = answers.filter(
+            (answer) =>
+              !selectedAnswerIds.includes(answer.id) ||
+              answer.id === selectedAnswers[question.id]
+          );
+          const options = remainingAnswers.map((answer) => ({
+            label: answer.text,
+            value: answer.id,
+          }));
+
+          return (
+            <Question
+              key={question.answerId}
+              correctAnswer={
+                answers.find((answer) => answer.id === question.answerId)!
+              }
+              onChange={(e) =>
+                setSelectedAnswers({
+                  ...selectedAnswers,
+                  [question.id]: e.target.value,
+                })
+              }
+              options={options}
+              question={question.text}
+              value={selectedAnswers[question.id]}
+            />
+          );
+        })}
       </section>
     </div>
   );
@@ -128,34 +132,78 @@ type Option = {
 };
 
 export const Question = ({
-  answer,
+  correctAnswer,
   onChange,
   options,
   question,
   value,
 }: {
-  answer: string;
+  correctAnswer: { id: string; text: string };
   onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
   options: Option[];
   question: string;
   value: string;
 }) => {
-  const isInvalid = value && value !== answer;
-  const isCorrect = value && value === answer;
+  const isInvalid = value && value !== correctAnswer.id;
+  const isCorrect = value && value === correctAnswer.id;
+
   return (
-    <div>
-      <p>{question}</p>
+    <div
+      style={{
+        borderBottom: "1px solid white",
+        display: "flex",
+        flexDirection: "column",
+        paddingBottom: 16,
+      }}
+    >
+      <p
+        style={{
+          alignItems: "center",
+          color: isCorrect
+            ? "palegreen"
+            : isInvalid
+            ? "rgb(255, 204, 203)"
+            : "unset",
+          display: "flex",
+          fontWeight: "bold",
+        }}
+      >
+        {isInvalid && <FaTimes style={{ marginRight: 8 }} />}
+        {isCorrect && <FaCheck style={{ marginRight: 8 }} />}
+        {question}
+      </p>
       {isCorrect ? (
-        <div>Correct!</div>
+        <div>
+          <div>{correctAnswer.text}</div>
+        </div>
       ) : (
-        <select onChange={onChange} placeholder="Select reason">
-          <option value="">Select an option</option>
+        <select
+          onChange={onChange}
+          placeholder="Select reason"
+          style={{
+            backgroundColor: isInvalid ? "rgb(255, 204, 203)" : "white",
+            marginBottom: 8,
+            padding: 8,
+          }}
+          value={value}
+        >
+          <option style={{ backgroundColor: "white" }} value="">
+            Select an option
+          </option>
           {options.map((option) => (
-            <option value={option.value}>{option.label}</option>
+            <option
+              key={option.value}
+              style={{ backgroundColor: "white" }}
+              value={option.value}
+            >
+              {option.label}
+            </option>
           ))}
         </select>
       )}
-      {isInvalid && <span style={{ color: "red" }}>WRONG</span>}
+      {isInvalid && (
+        <span style={{ color: "rgb(255, 204, 203)" }}>Try again!</span>
+      )}
     </div>
   );
 };
