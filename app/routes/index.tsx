@@ -39,8 +39,8 @@ export let loader: LoaderFunction = () => {
 // https://remix.run/api/conventions#meta
 export let meta: MetaFunction = () => {
   return {
-    title: "Remix Starter",
-    description: "Welcome to remix!",
+    title: "Nickey's Best Friend Playlist",
+    description: "A playlist matching game for my best friend :)",
   };
 };
 
@@ -82,15 +82,10 @@ export default function Index() {
           It'll update automatically every time you load this page. The game
           will not - you might not have questions for new songs...sorry!
         </p>
-        <p>
-          Match the song to the reason I put it on the playlist. The reasons
-          range from very deep to just thinking you might like the song.
-        </p>
         <p style={{ marginBottom: 24 }}>
           I tried to limit the playlist to one song per artist. I also tried to
           avoid artists/songs you sent me, except when they're extremely
-          relevant. And for the first time this was published I looked through
-          every single one of my liked songs (you're welcome :) ).
+          relevant.
         </p>
         <iframe
           src="https://open.spotify.com/embed/playlist/7cDko7hlQAiItWT1jUE2eV"
