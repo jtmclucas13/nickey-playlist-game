@@ -217,7 +217,7 @@ export const QUESTIONS = [
     text: "Monsters - All Time Low (feat. Demi Lovato & blackbear)",
   },
   {
-    answerId: "want-you-to-like",
+    answerId: "want-you-to-like-1",
     id: "bridgers-1",
     text: "Chinese Satellite (Copycat Killer version) - Phoebe Bridgers, Rob Moose",
   },
